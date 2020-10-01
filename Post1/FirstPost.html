@@ -16,8 +16,27 @@
 <h1>2. Scatter Plot</h1>
 <svg id = "svg2" width = "10000" height = "500"></svg></div>
 </div>
-
+<div id = "practice"></div>
 <script>
+    //Practice
+    var sampleData = [
+        [10, 20], [20, 100], [200, 50],
+        [25, 80], [10, 200], [150, 75],
+        [10, 70], [30, 150], [100, 15]
+    ]
+
+    var svg3 = d3.select("#practice")
+                .append("svg")
+                .attr("width", 250)
+                .attr("height", 250)
+
+    svg3.selectAll("circle")
+    .data(sampleData).enter()
+    .append("circle")
+    .attr("cx", function(d) {return d[0]})
+    .attr("cy", function(d) {return d[1]})
+    .attr("r", 4)
+
     // Bar chart 
     var svg = d3.select("#svg1"), margin = 200, width = svg.attr("width") - margin, height = svg.attr("height") - margin
     var XScale = d3.scaleBand().range([0, width]).padding(0.5),
@@ -75,16 +94,17 @@
     });
 
 // Scatter Plot
-var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin, height = svg2.attr("height") - margin
+var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin, height = svg2.attr("height") - margin;
     // Setup X
     var XVal = function(d) {return d.GDP;}, 
         XScale2 = d3.scaleLinear().range([0, width]),
-        //
-        XMap = function(d) {return XScale2(XVal(d));};
+        XMap = function(d) {return XScale2(XVal(d));}, //
+        xAxis = d3.svg.axis().scale(XScale2);
     // Setup Y
     var YVal = function(d) {return d.Ladderscore;},   
         YScale2 = d3.scaleLinear().range([height, 0]),
         YMap = function(d) {return YScale2(YVal(d));};
+        yAxis = d3.svg.axis().scale(YScale2);
     var g2 = svg2.append("g")
         .attr("transform", "translate(" + 100 + "," + 100 + ")");
     svg2.append("text")
@@ -96,12 +116,13 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
 
     // Retrieve the csv data 
     d3.csv("./archive/2020_revised.csv", function(data) {
-        XScale.domain(data.map(function(d) { return d.GDP; }));
-        YScale.domain([0, d3.max(data, function(d) { return d.Ladderscore; })]);
+        XScale2.domain(data.map(function(d) { return d.GDP; }));
+        //XScale2.domain(d3.extent(data, function(d) { return d.GDP; }));
+        YScale2.domain([0, d3.max(data, function(d) { return d.Ladderscore; })]);
 
         g2.append("g")
          .attr("transform", "translate(0," + height + ")")
-         .call(d3.axisBottom(XScale))
+         .call(xAxis)
          .append("text")
          .attr("y", height - 250)
          .attr("x", width - 100)
@@ -110,7 +131,7 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
          .text("GDP");
 
         g2.append("g")
-         .call(d3.axisLeft(YScale).tickFormat(function(d){
+         .call(d3.axisLeft(YScale2).tickFormat(function(d){
              return d;
          })
          .ticks(10))
@@ -120,10 +141,17 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
          .attr("dy", "-5.1em")
          .attr("text-anchor", "end")
          .attr("stroke", "black")
-         .text("Happiness Rate");
-
-        svg2.sellectAll(".dot").data(data).enter().append("circle")
-        .attr("r", 3.5).attr("cx", XMap).attr("cy", YMap) 
+         .text("Happiness Rate")
+         .call(yAxis);
+        console.log(XScale2(data.GDP));
+        console.log(YScale2(data.Ladderscore));
+        
+        // Add dots 
+        svg2.selectAll("circle").data(data).enter().append("circle")
+        .attr("r", 3.5)
+        .attr("cx", function(data) { return XScale2(d.GDP);})
+        .attr("cy", function(data) { return YScale2(d.Ladderscore);})
+        .attr("fill", "pink")
         // Add mouseover interaction 
         .on("mouseover", function(d) {
             tooltip.transition().duration(200).style("opacity", .9);
@@ -132,6 +160,8 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
             tooltip.transition().duration(500).style("opacity", .0);
         })
     });
+
+
 </script>
 </body>
 <style>
