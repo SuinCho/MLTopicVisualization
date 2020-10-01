@@ -76,8 +76,15 @@
 
 // Scatter Plot
 var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin, height = svg2.attr("height") - margin
-    var XScale = d3.scaleBand().range([0, width]).padding(0.5),
-        YScale = d3.scaleLinear().range([height, 0]);
+    // Setup X
+    var XVal = function(d) {return d.GDP;}, 
+        XScale2 = d3.scaleLinear().range([0, width]),
+        //
+        XMap = function(d) {return XScale2(XVal(d));};
+    // Setup Y
+    var YVal = function(d) {return d.Ladderscore;},   
+        YScale2 = d3.scaleLinear().range([height, 0]),
+        YMap = function(d) {return YScale2(YVal(d));};
     var g2 = svg2.append("g")
         .attr("transform", "translate(" + 100 + "," + 100 + ")");
     svg2.append("text")
@@ -116,7 +123,7 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
          .text("Happiness Rate");
 
         svg2.sellectAll(".dot").data(data).enter().append("circle")
-        .attr("class", "dot").attr("r", 3.5).attr("cx", XScale).attr("cy", YScale) 
+        .attr("r", 3.5).attr("cx", XMap).attr("cy", YMap) 
         // Add mouseover interaction 
         .on("mouseover", function(d) {
             tooltip.transition().duration(200).style("opacity", .9);
@@ -128,12 +135,9 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
 </script>
 </body>
 <style>
-    /* div {
-            height: 100px;
-            width: 100px;
-            background-color: steelblue;
-            margin:5px;
-        } */
+    body {
+        font: 11px sans-serif;
+        }
     #container {
         height: 100px;
         width: 100px;
@@ -146,8 +150,18 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
             fill: steelblue;
         }
 
-        .highlight {
+    .highlight {
             fill: pink;
+        }
+    .dot {
+        stroke: #000;
+        }
+
+    .tooltip {
+        position: absolute;
+        width: 200px;
+        height: 28px;
+        pointer-events: none;
         }
 </style>
 
