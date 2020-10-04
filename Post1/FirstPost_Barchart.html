@@ -125,6 +125,15 @@ var svg2 = d3.select("#svg2"), margin = 200, width = svg2.attr("width") - margin
         .attr("font-size", "24px")
         .text("Happiness rate Linear regression")
 
+    // Draw the regression line 
+    var newline = d3.line()
+        .x(function(d) {
+            return xScale(d.GDP);
+        })
+    .y(function(d) {
+            return yScale(d.Ladderscore);
+        });
+
     // Retrieve the csv data 
     d3.csv("./archive/2020_revised.csv", function(data) {
         XScale2.domain(data.map(function(d) { return d.GDP; }));
