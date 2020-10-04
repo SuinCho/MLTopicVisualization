@@ -75,6 +75,8 @@
                 "x": x[i]
             })
         }
+        console.log(x);
+        console.log(yhat);
         return (data);
     }
     //create data points
@@ -147,7 +149,7 @@
         .attr("r", 3.5);
 
 
-    // define regression line
+    // append regression line
     svg.append("path")
         .datum(dataset)
         .attr("clip-path", "url(#chart-area)")
