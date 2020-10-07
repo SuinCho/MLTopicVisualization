@@ -1,4 +1,5 @@
 # MLTopicVisualization
+
 ## Steps to resolve CORS erros
 Please run on the root directory of the project: 
 ``` 
