@@ -75,8 +75,6 @@
                 "x": x[i]
             })
         }
-        console.log(x);
-        console.log(yhat);
         return (data);
     }
     //create data points
@@ -116,12 +114,15 @@
     // create regression line 
     var regressionLine = d3.line()
         .x(function(d) {
+           console.log(d.x);
             return xScale(d.x);
         })
         .y(function(d) {
+            console.log(d.yhat);
             return yScale(d.yhat);
+            
         });
-
+    
     // cut off datapoints that are outside the axis
     svg.append("clipPath")
         .attr("id", "chart-area")

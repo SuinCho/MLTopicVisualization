@@ -12,7 +12,7 @@
 <div class="center">
     <div id = "scatterplotviz">
         <h1>Scatterplot - GDP:Happiness Rate</h1>
-    </div>
+     </div>
 </div>
 
 <script>
@@ -26,6 +26,7 @@ var svg = d3.select("#scatterplotviz")
             .append("svg")
             .attr("width", width)
             .attr("height", height);
+
 
 // read the csv data
 d3.csv("./archive/2020_revised.csv", function(data) {
@@ -41,6 +42,8 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     x.push(data.map(function(d) {return parseFloat(d.GDP);}));
     y.push(data.map(function(d) {return parseFloat(d.Ladderscore);}));
     
+    console.log(x);
+    console.log(y);
     // calculate mean of GDP and Ladderscore
     for (var i = 0; i < numSamples; i++) {
         meanGDP += x[0][i];
@@ -76,13 +79,17 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     var datatoReturn = [];
     for (i = 0; i < y[0].length; i++) {
         datatoReturn.push({
-            "yhat": yhat[i],
+            "yhat": yhat[i],                 
             "y": y[0][i],
             "x": x[0][i]
         })
     }
     console.log(yhat);
     console.log(x[0]);
+    var trimmedData = [];
+    trimmedData.push(x[0]);
+    console.log(trimmedData);
+    console.log(trimmedData);
 
     // define scales 
     var xScale = d3.scaleLinear().domain([6, d3.max(data, function(d){
@@ -104,12 +111,16 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     // create regression line 
     var regressionLine = d3.line()
         .x(function(d) {
-            return xScale(d.x);
+            console.log(d.GDP);
+            return xScale(d.GDP);
         })
-        .y(function(d) {
-            return yScale(d.yhat);
-        });
-
+        .y(yhat);
+    
+        // .y(function(d) {
+        //     console.log(d.yhat);
+        //     console.log(yhat);
+        //     return yScale(d.yhat);
+        // });
     // cut off datapoints that are outside the axis
     svg.append("clipPath")
         .attr("id", "chart-area")
@@ -165,19 +176,101 @@ d3.csv("./archive/2020_revised.csv", function(data) {
 
     
     // append regression line 
-    svg.append("path")
-        .datum(data)
-        .attr("clip-path", "url(#chart-area)")
-        .attr("class", "line")
-        .attr("d", regressionLine)
-        // .on("mouseover", function(d) { // Add mouseover interaction
-        //     tooltip.transition().duration(200).style("opacity", .9);
-        // })
-        // .on("mouseout", function(d) {
-        //     tooltip.transition().duration(500).style("opacity", .0);
-        // });
+    // svg.append("path")
+    //     .datum(data)
+    //     .attr("clip-path", "url(#chart-area)")
+    //     .attr("class", "line")
+    //     .attr("d", regressionLine)
+    //     // .on("mouseover", function(d) { // Add mouseover interaction
+    //     //     tooltip.transition().duration(200).style("opacity", .9);
+    //     // })
+    //     // .on("mouseout", function(d) {
+    //     //     tooltip.transition().duration(500).style("opacity", .0);
+    //     // });
+    
+    var lg = calcLinear(data, "x", "y", d3.min(data, function(d){ return d.GDP}), d3.min(data, function(d){ return d.GDP}));
+    svg.append("line")
+            .attr("class", "regression")
+            .attr("x1", x(linearRegression.ptA.x))
+	        .attr("y1", y(linearRegression.ptA.y))
+	        .attr("x2", x(linearRegression.ptB.x))
+	        .attr("y2", y(linearRegression.ptB.y));
 }) 
+function types(d){
+	    d.x = +d.x;
+	    d.y = +d.y;
 
+	    return d;
+}
+
+function calcLinear(data, x, y, minX, minY){
+      /////////
+      //SLOPE//
+      /////////
+
+      // Let n = the number of data points
+      var n = data.length;
+
+      // Get just the points
+      var pts = [];
+      data.forEach(function(d,i){
+        var obj = {};
+        obj.x = d[x];
+        obj.y = d[y];
+        obj.mult = obj.x*obj.y;
+        pts.push(obj);
+      });
+
+      // Let a equal n times the summation of all x-values multiplied by their corresponding y-values
+      // Let b equal the sum of all x-values times the sum of all y-values
+      // Let c equal n times the sum of all squared x-values
+      // Let d equal the squared sum of all x-values
+      var sum = 0;
+      var xSum = 0;
+      var ySum = 0;
+      var sumSq = 0;
+      pts.forEach(function(pt){
+        sum = sum + pt.mult;
+        xSum = xSum + pt.x;
+        ySum = ySum + pt.y;
+        sumSq = sumSq + (pt.x * pt.x);
+      });
+      var a = sum * n;
+      var b = xSum * ySum;
+      var c = sumSq * n;
+      var d = xSum * xSum;
+
+      // Plug the values that you calculated for a, b, c, and d into the following equation to calculate the slope
+      // slope = m = (a - b) / (c - d)
+      var m = (a - b) / (c - d);
+
+      /////////////
+      //INTERCEPT//
+      /////////////
+
+      // Let e equal the sum of all y-values
+      var e = ySum;
+
+      // Let f equal the slope times the sum of all x-values
+      var f = m * xSum;
+
+      // Plug the values you have calculated for e and f into the following equation for the y-intercept
+      // y-intercept = b = (e - f) / n
+      var b = (e - f) / n;
+      // return an object of two points
+      // each point is an object with an x and y coordinate
+      return {
+        ptA : {
+          x: minX,
+          y: m * minX + b
+        },
+        ptB : {
+          y: minY,
+          x: (minY - b) / m
+        }
+      }
+
+    }
 </script>
 </body>
 <style>
