@@ -38,18 +38,22 @@
            k = 25;
         var x = []
         var y = []
-        x.push(d.map(function(d) {return parseFloat(d.GDP);}));
-        y.push(d.map(function(d) {return parseFloat(d.Ladderscore);}));
+        
+        x.push(d.map(function(d) {
+          return parseFloat(d.GDP);}));
+        y.push(d.map(function(d) {
+          console.log(y)
+          return parseFloat(d.Ladderscore);}));
        
-        // var xScale = d3.scaleLinear().domain([6, d3.max(d, function(d){
-        //                             return d.GDP;
-        //                         })])
-        //                         .range([0, width]);
-        // var yScale = d3.scaleLinear().domain([0, d3.max(d, function(d){
-        //                                 //console.log(d.Ladderscore);
-        //                                 return d.Ladderscore;
-        //                             })])
-        //                         .range([height, 0]);
+        var xScale = d3.scale.linear().domain([6, d3.max(d, function(d){
+                                    return d.GDP;
+                                })])
+                                .range([0, width]);
+        var yScale = d3.scale.linear().domain([0, d3.max(d, function(d){
+                                        //console.log(d.Ladderscore);
+                                        return d.Ladderscore;
+                                    })])
+                                .range([height, 0]);
         var kDiv = d3.select(".k")
         .on("change", function() {
           k = +kDiv.select("input").node().value;
@@ -98,7 +102,6 @@
           .selectAll("circle").data(data)
         .enter().append("circle")
           .attr("cx", function(d) { 
-            console.log(typeof(d.x[0]))
             return d.x; })
           .attr("cy", function(d) { return d.y; })
           .attr("r", 2)

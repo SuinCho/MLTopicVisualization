@@ -1,0 +1,157 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <base target="_top">
+    <title>Tangle: a JavaScript library for reactive documents</title>
+
+    <!-- stylesheets -->
+    <!-- <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="../Tangle/Fonts/Insolent/stylesheet.css" type="text/css">
+    <link rel="stylesheet" href="../Tangle/Fonts/BorisBlackBloxx/stylesheet.css" type="text/css"> -->
+    <link rel = "stylesheet" href = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.css"></script>
+    <link rel="stylesheet" href="main.css" type="text/css">
+
+    <!--jquery-->
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <!-- Tangle -->
+    <!-- <script type="text/javascript" src="../../Tangle.js"></script> -->
+
+    <!-- TangleKit -->
+    <!-- <link rel="stylesheet" href="../Tangle/TangleKit/TangleKit.css" type="text/css">
+    <script type="text/javascript" src="../Tangle/TangleKit/mootools.js"></script>
+    <script type="text/javascript" src="../Tangle/TangleKit/sprintf.js"></script>
+    <script type="text/javascript" src="../Tangle/TangleKit/BVTouchable.js"></script>
+    <script type="text/javascript" src="../Tangle/TangleKit/TangleKit.js"></script> -->
+
+    <!-- examples -->
+    <!-- <script type="text/javascript" src="LinearData.js"></script> -->
+    <script type="text/javascript" src="NonlinearData.js"></script>
+  </head>
+  <body>
+        <!--Slider-->
+        <div class = "slidecontainer">
+            <p>GDP of</p>
+            <p id = "country"></p> <p>: </p> <p id = "gdpval"></p>
+            <input type = "range" min = "1.0" max = "15.0" value = "50" step="0.001" class = "slider" id = "gdpslider">
+        </div>
+  </body>
+</html>
+<script>
+$(document).ready(function(){
+    $.ajax({
+        url:"./archive/2020_revised.csv",
+        dataType:"text", 
+        success:function(data)
+        {
+            var country_data = data.split(/\r?\n|\r/);
+            var country_name = [];
+             var gdp = [];
+             var ladder_score = [];
+            for(var count = 1; count < country_data.length; count++) {
+                var cell_data = country_data[count].split(",");
+                 for (var cell_count = 0; cell_count < cell_data.length; cell_count++) {
+                     if(cell_count === 0) {
+                         country_name.push(cell_data[cell_count]);
+                     }
+                     if(cell_count === 2) {
+                         ladder_score.push(cell_data[cell_count]);
+                     }
+                     if(cell_count === 6){
+                         gdp.push(cell_data[cell_count]);
+                     }
+                 }
+            }
+        computeMedian(country_name, gdp, ladder_score);
+        setDefault(medianGDP, medianLadder, country_name, gdp, ladder_score, truncGDP, truncLadderscore);
+        //changeValue(country_name, gdp, ladder_score);
+        }
+    })
+ })
+
+ function computeMedian(country_name, gdp, ladder_score) {
+    var floatGDP = [];
+    var floatLadderscore = [];
+    var truncGDP = [];
+    var truncLadderscore = [];
+     for(var i = 0; i < gdp.length; i++) {
+        floatGDP.push(parseFloat(gdp[i]));
+        floatLadderscore.push(parseFloat(ladder_score[i]));
+     }
+     for (var i = 0; i <gdp.length; i++) {
+         truncGDP.push(floatGDP[i].toFixed(3));
+         truncLadderscore.push(floatLadderscore[i].toFixed(3));
+     }
+     console.log(truncGDP);
+     const arrGDPSort = floatGDP.sort((a,b)=>a-b);
+     const arrLadderSort = floatLadderscore.sort((a,b)=>a-b);
+    //  console.log(arrGDPSort);
+     const midGDP = Math.ceil(gdp.length/2);
+     const midLadder = Math.ceil(ladder_score.length/2);
+     const medianGDP = gdp.length % 2 == 0 ? (arrGDPSort[midGDP] + arrGDPSort[midGDP - 1]) / 2 : arrGDPSort[midGDP - 1];
+     const medianLadder = ladder_score.length % 2 == 0 ? (arrLadderSort[midLadder] + arrLadderSort[midLadder - 1]) / 2 : arrLadderSort[midLadder - 1];
+     console.log(medianGDP);
+     console.log(medianLadder);
+     setDefault(medianGDP, medianLadder, country_name, gdp, ladder_score, truncGDP, truncLadderscore)
+ }
+
+ function setDefault(medianGDP, medianLadder, country_name, gdp, ladder_score, truncGDP, truncLadderscore) {
+    var country;
+    var gdpval;
+    var ladderval;
+    console.log(medianGDP);
+    for (var i = 0; i <gdp.length; i++) {
+        if(medianGDP == parseFloat(gdp[i])) {
+            console.log(parseFloat(gdp[i]))
+            console.log(i)
+            country = country_name[i];
+            gdpval = parseFloat(gdp[i])
+            ladderval = parseFloat(ladder_score[i]);
+        }
+    }
+    console.log(country);
+    console.log(gdpval);
+    console.log(ladderval);
+    var slider = document.getElementById("gdpslider");
+     $("#gdpslider").val(gdpval);
+     $("#country").text(country);
+     $("#gdpval").text(gdpval);
+    
+    var outputGDP = document.getElementById("gdpval");
+    var outputcountry = document.getElementById("country");
+    
+    /* when move the slide */
+    slider.oninput = function() {
+        outputGDP.innerHTML = this.value; 
+        console.log(gdp)
+        console.log(parseFloat(this.value));
+        console.log(typeof this.value);
+
+        /* check if ther eis current val in gdp arr*/
+        if(truncGDP.includes(this.value)) { ////////////////////////////Shold change this part 
+            console.log("t");
+                $("#country").text(country_name[i]);
+                console.log(country_name[i]);
+        }
+
+    }
+ }
+
+ function changeValue(country_name, gdp, ladder_score) {
+    var slider = document.getElementById("gdpslider");
+    var outputGDP = document.getElementById("gdpval");
+    var outputcountry = document.getElementById("country");
+    //outputGDP.innerHTML = parseFloat(slider.value);
+
+    slider.oninput = function() {
+        outputGDP.innerHTML = this.value;
+        console.log(this.value);
+    }
+
+ }
+
+
+
+</script>
+
+
