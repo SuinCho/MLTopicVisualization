@@ -55,7 +55,8 @@ h1 {
     cursor: pointer;
 }
 .slidecontainer {
-    width: 100%; /* Width of the outside container */
+    /*width: 50%; /* Width of the outside container */
+    padding: 25px 50px 75px 100px;
 }
   
   /* The slider itself */
@@ -71,6 +72,13 @@ h1 {
     transition: opacity .2s;
 }
   
+#sliderdiv {
+    padding: 25px 50px 75px 100px;
+    background-color: yellow;
+    text-align: center;
+    color: red;
+  }
+
 /* Mouse-over effects */
 .slider:hover {
     opacity: 1; /* Fully shown on mouse-over */

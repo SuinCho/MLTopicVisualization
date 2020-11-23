@@ -29,12 +29,20 @@
     <script type="text/javascript" src="NonlinearData.js"></script>
   </head>
   <body>
-        <!--Slider-->
+    <div id = "sliderdiv">
+        <!--GDPslider-->
         <div class = "slidecontainer">
-            <p>GDP of</p>
+            <p>GDP of </p>
             <p id = "country"></p> <p>: </p> <p id = "gdpval"></p>
             <input type = "range" min = "1.0" max = "15.0" value = "50" step="0.001" class = "slider" id = "gdpslider">
         </div>
+        <!--Happinessrateslider-->
+        <div class = "slidecontainer">
+            <p>Happiness Rate of</p>
+            <p id = "country2"></p> <p>: </p> <p id = "ladval"></p>
+            <input type = "range" min = "1.0" max = "15.0" value = "50" step="0.001" class = "slider" id = "ladslider">
+        </div>
+    </div>
   </body>
 </html>
 <script>
@@ -83,6 +91,7 @@ $(document).ready(function(){
          truncLadderscore.push(floatLadderscore[i].toFixed(3));
      }
      console.log(truncGDP);
+     console.log(truncLadderscore);
      const arrGDPSort = floatGDP.sort((a,b)=>a-b);
      const arrLadderSort = floatLadderscore.sort((a,b)=>a-b);
     //  console.log(arrGDPSort);
@@ -90,6 +99,7 @@ $(document).ready(function(){
      const midLadder = Math.ceil(ladder_score.length/2);
      const medianGDP = gdp.length % 2 == 0 ? (arrGDPSort[midGDP] + arrGDPSort[midGDP - 1]) / 2 : arrGDPSort[midGDP - 1];
      const medianLadder = ladder_score.length % 2 == 0 ? (arrLadderSort[midLadder] + arrLadderSort[midLadder - 1]) / 2 : arrLadderSort[midLadder - 1];
+    console.log(arrLadderSort);
      console.log(medianGDP);
      console.log(medianLadder);
      setDefault(medianGDP, medianLadder, country_name, gdp, ladder_score, truncGDP, truncLadderscore)
@@ -97,6 +107,7 @@ $(document).ready(function(){
 
  function setDefault(medianGDP, medianLadder, country_name, gdp, ladder_score, truncGDP, truncLadderscore) {
     var country;
+    var country2;
     var gdpval;
     var ladderval;
     console.log(medianGDP);
@@ -106,19 +117,31 @@ $(document).ready(function(){
             console.log(i)
             country = country_name[i];
             gdpval = parseFloat(gdp[i])
+        }
+        if(medianLadder == parseFloat(ladder_score[i])){
+            console.log(parseFloat(ladder_score[i]))
+            console.log(i)
+            country2 = country_name[i];
             ladderval = parseFloat(ladder_score[i]);
         }
     }
     console.log(country);
+    console.log(country2);
     console.log(gdpval);
     console.log(ladderval);
     var slider = document.getElementById("gdpslider");
+    var slider2 = document.getElementById("ladslider");
      $("#gdpslider").val(gdpval);
      $("#country").text(country);
      $("#gdpval").text(gdpval);
+     $("#ladderslider").val(ladderval);
+     $("#country2").text(country2);
+     $("#ladval").text(ladderval);
     
     var outputGDP = document.getElementById("gdpval");
     var outputcountry = document.getElementById("country");
+    var outputLadder = document.getElementById("ladderval");
+    var outputcountry2 = document.getElementById("country2");
     
     /* when move the slide */
     slider.oninput = function() {
