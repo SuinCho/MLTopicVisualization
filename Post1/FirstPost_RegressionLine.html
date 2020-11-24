@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    
+    <script src="leastsquares.js"></script>
+    <script src="d3functions.js"></script>
     <link rel="stylesheet" type="text/css" href="main.css">
   </head>
 <body>
@@ -13,14 +16,20 @@
   <br></br><br></br><br></br><br></br>
   <div class="center">
     <button id = "newdataBtn" type="button">Try New Dataset!</button>
+    <button id="residBtn" class="button">Residual View</button>
+    <button id="resetBtn" class="button">Reset</button>
   </div>
   <script>
-
+    // plot setup
     var width = 800;
     var height = 500;
     var padding = 30;
     var numDataPoints = 500;
     
+    //global variables 
+    var data = [];
+    var residual = [];
+
     // function to create random data 
     function create_data(nsamples) {
         var x = [];
@@ -77,8 +86,10 @@
         }
         return (data);
     }
+
     //create data points
     var dataset = create_data(numDataPoints);
+    data = dataset;
 
     // create svg
     var svg = d3.select("#scatterplot")
@@ -102,6 +113,8 @@
                               return d.y;
                           })]) 
                           .range([height-padding, padding]);
+
+    var r = d3.scaleLinear().domain([0,500]).range([0,20]);
 
     //define axis 
     var xAxis = d3.axisBottom()
@@ -148,7 +161,8 @@
           return yScale(d.y);
         })
         .attr("r", 3.5);
-
+    
+    var residview = false;
 
     // append regression line
     svg.append("path")
@@ -178,7 +192,6 @@
       .on("click", function(){
         // create new data
         dataset = create_data(numDataPoints);
-
 
         //Update scale domains
         xScale.domain([0, d3.max(dataset, function(d) { return d.x; })]);
@@ -222,8 +235,75 @@
                 .transition()
                 .duration(1000)
                 .call(yAxis);
-
       });
+
+    // show residual line when clicked 
+    d3.select('#residBtn').on('click', function() {
+     //console.log(dataset);
+      console.log(residview);
+      if(residview) {
+        svg.selectAll('path.resline').remove();
+        svg.selectAll('path.halfcirc').remove();
+        svg.selectAll("circle").style("opacity", 1)
+        residview = false;
+      }
+      else {
+        svg.selectAll("circle").style("opacity", 0.5)
+        residview = true;
+        drawresiduals(data);
+
+      }
+    })
+
+    // reset when the button clicked 
+    d3.select('#resetBtn').on('click', function() {
+      svg.selectAll('path.resline').remove();
+      svg.selectAll('path.halfcirc').remove();
+      svg.selectAll('circle').remove();
+      //svg.selectAll('path').remove();
+      residview = false;
+      data = []
+      residual = []
+    });
+    
+    //draw new circle on the plot 
+    svg.on('click', function(){
+      if(d3.mouse(this)[0] > (50 + r(200)) && d3.mouse(this)[0] < (450 - r(200)) && d3.mouse(this)[1] > (50 + r(200)) && d3.mouse(this)[1] < (450 - r(200))){
+      //push new data point to data array
+      data.push({"x": d3.mouse(this)[0], "y": d3.mouse(this)[1], "radius": 200, "fill": "Europe", "opacity": 90000});
+
+      //select each circle and append the data
+      var selection = svg.selectAll("circle").data(data)
+
+      //update selection and draw new circle
+      selection.enter()
+        .append("circle")
+        .attr("cx",function(d) {return d.x;})
+        .attr("cy",function(d) {return d.y;})
+        .attr("r",function(d) {return r(d.radius);})
+        .style("fill",function(d) {return "green";})
+        .style("opacity",function(d) {
+          if(residview){
+            return 0;
+          } 
+          else {
+            return o(+d.opacity);
+          }
+      })
+
+      //exit selection
+      selection.exit().remove()
+      if(data.length == 2) {
+        drawline(data);
+      } 
+      else if(data.length > 2) {
+        transitionline(data);
+        if(residview){
+          resids = drawresiduals(data);
+         }
+      }
+     }
+    })
     </script>
 </body>
 </html>

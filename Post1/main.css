@@ -54,6 +54,35 @@ h1 {
     margin: 4px 2px;
     cursor: pointer;
 }
+  
+#residBtn {
+    border: none;
+    background-color: #742424;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 24px;
+    width: 30%;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+#resetBtn {
+    border: none;
+    background-color: #4c4eaf;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 24px;
+    width: 30%;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
 .slidecontainer {
     /*width: 50%; /* Width of the outside container */
     padding: 25px 50px 75px 100px;
@@ -74,9 +103,9 @@ h1 {
   
 #sliderdiv {
     padding: 25px 50px 75px 100px;
-    background-color: yellow;
+    background-color: pink;
     text-align: center;
-    color: red;
+    color: black;
   }
 
 /* Mouse-over effects */
@@ -100,3 +129,23 @@ h1 {
     background: #4c4eaf; 
     cursor: pointer; /* Cursor on hover */
 }
+
+.h,.v{
+    stroke:black;
+    stroke-dasharray:4 4;
+    stroke-width:1;
+    stroke-opacity:.5;
+  }
+  
+  .axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+  }
+  
+  .axis text {
+      font-family: sans-serif;
+      font-size: 11px;
+  }
+
+
