@@ -4,6 +4,8 @@
     <head>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <link rel="stylesheet" type="text/css" href="main.css">
+        <script src="leastsquares.js"></script>
+        <!-- <script src="d3functions.js"></script> -->
     </head>
 </head>
 
@@ -32,18 +34,59 @@ var svg = d3.select("#scatterplotviz")
 d3.csv("./archive/2020_revised.csv", function(data) {
     var x = [];
     var y = [];
+    var dataset = [];
     var meanGDP = 0;
     var meanLadderscore = 0;
     var numSamples = data.length;
     var term1 = 0;
     var term2 = 0;
 
+     // define scales 
+    var xScale = d3.scaleLinear().domain([6, d3.max(data, function(d){
+                                    return d.GDP;
+                                })])
+                                .range([0, width]);
+    var yScale = d3.scaleLinear().domain([0, d3.max(data, function(d){
+                                        //console.log(d.Ladderscore);
+                                        return d.Ladderscore;
+                                    })])
+                                .range([height, 0]);
+
+    //define axis 
+    var xAxis = d3.axisBottom()
+                    .scale(xScale);
+
+    var yAxis = d3.axisLeft()
+                    .scale(yScale)
+
     // push GDP data and Ladderscore data into the var x, y
     x.push(data.map(function(d) {return parseFloat(d.GDP);}));
     y.push(data.map(function(d) {return parseFloat(d.Ladderscore);}));
+
+    // for (var i = 0 ; i < numSamples; i++) {
+    //     dataset.push({"GDP": x[0][i], "Ladderscore": y[0][i]});
+    // }
+    // var xValues = data.map(function(d){return parseFloat(d.GDP);});
+    // var yValues = data.map(function(d){return parseFloat(d.Ladderscore);});
+    // var lsCoef = [LeastSquares(xValues, yValues)];
+    
+    // console.log(lsCoef);
+    // console.log(dataset);
+
+    // var lineFunction = d3.line()
+    //   .x(function(d) { return parseFloat(d.GDP); })
+    //   .y(function(d) { return parseFloat(d.Ladderscore); });
+  
+    // svg.append('path')
+    //   .attr("d", lineFunction([{"GDP": 50, "Ladderscore": lsCoef[0].m * 50 + lsCoef[0].b},{"GDP": 450, "Ladderscrore": lsCoef[0].m * 450 + lsCoef[0].b}]))
+    //   .attr("stroke-width", 2)
+    //   .attr("stroke", "black")
+    //   .attr('id', 'regline');
+  
     
     console.log(x);
     console.log(y);
+
     // calculate mean of GDP and Ladderscore
     for (var i = 0; i < numSamples; i++) {
         meanGDP += x[0][i];
@@ -90,36 +133,27 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     trimmedData.push(x[0]);
     console.log(trimmedData);
     console.log(trimmedData);
+    console.log(datatoReturn);
 
-    // define scales 
-    var xScale = d3.scaleLinear().domain([6, d3.max(data, function(d){
-                                    return d.GDP;
-                                })])
-                                .range([0, width]);
-    var yScale = d3.scaleLinear().domain([0, d3.max(data, function(d){
-                                        //console.log(d.Ladderscore);
-                                        return d.Ladderscore;
-                                    })])
-                                .range([height, 0]);
-    //define axis 
-    var xAxis = d3.axisBottom()
-                    .scale(xScale);
+    datatoReturn.forEach(function(d) {
+        d.x = +d.x;
+        d.y = +d.y;
+        d.yhat = +d.yhat;
+    });
 
-    var yAxis = d3.axisLeft()
-                    .scale(yScale)
-    
     // create regression line 
     var regressionLine = d3.line()
         .x(function(d) {
             //console.log(d.GDP);
-            return xScale(d.GDP);
+            return xScale(d.x);
         })
         //.y(yhat);
         .y(function(d) {
              //console.log(d.yhat);
              //console.log(yhat);
-             return yScale(yhat);
+             return yScale(d.yhat);
         });
+
     // cut off datapoints that are outside the axis
     svg.append("clipPath")
         .attr("id", "chart-area")
@@ -159,117 +193,47 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("id", "circles")
         .attr("clip-path", "url(#chart-area)")
         .selectAll("circle")
-        .data(data)
+        .data(datatoReturn)
         .enter()
         .append("circle")    
         .attr("class", "dot")
         .attr("cx", function(d){
-          return xScale(d.GDP);
+          return xScale(d.x);
         })
         .attr("cy", function(d){
-          return yScale(d.Ladderscore);
+          return yScale(d.y);
         })
         .attr("r", 3.5)
         .style("fill", "pink")
         .style("stroke", "pink");
-
     
+    d3.select("body").append("div").attr("class","tooltip");
+
     // append regression line 
     svg.append("path")
-        .datum(data)
-        .attr("clip-path", "url(#chart-area)")
+        .datum(datatoReturn)
         .attr("class", "line")
         .attr("d", regressionLine)
-    //     // .on("mouseover", function(d) { // Add mouseover interaction
-    //     //     tooltip.transition().duration(200).style("opacity", .9);
-    //     // })
-    //     // .on("mouseout", function(d) {
-    //     //     tooltip.transition().duration(500).style("opacity", .0);
-    //     // });
+        .attr("stroke", "#386cb0")
+        .attr("stroke-width", 1 + "px")
+        .on("mousemove",function(){
+            console.log("hahah")
+            d3.select(".tooltip").style("left",function(d){return (d3.event.pageX+10)+"px"}).style("top",function(d){ return (d3.event.pageY-50)+"px"});
+            d3.select(".tooltip").style("visibility","visible");})
+        .on("mouseout",function(){
+          d3.select(".tooltip").style("visibility","hidden");
+
+        });
+
+        //.attr("d", regressionLine)
+        // .on("mouseover", function(d) { // Add mouseover interaction
+        //     tooltip.transition().duration(200).style("opacity", .9);
+        // })
+        // .on("mouseout", function(d) {
+        //     tooltip.transition().duration(500).style("opacity", .0);
+        // });
     
-    var lg = calcLinear(data, "x", "y", d3.min(data, function(d){ return d.GDP}), d3.min(data, function(d){ return d.GDP}));
-    svg.append("line")
-            .attr("class", "regression")
-            .attr("x1", x(linearRegression.ptA.x))
-	        .attr("y1", y(linearRegression.ptA.y))
-	        .attr("x2", x(linearRegression.ptB.x))
-	        .attr("y2", y(linearRegression.ptB.y));
 }) 
-function types(d){
-	    d.x = +d.x;
-	    d.y = +d.y;
-
-	    return d;
-}
-
-function calcLinear(data, x, y, minX, minY){
-      /////////
-      //SLOPE//
-      /////////
-
-      // Let n = the number of data points
-      var n = data.length;
-
-      // Get just the points
-      var pts = [];
-      data.forEach(function(d,i){
-        var obj = {};
-        obj.x = d[x];
-        obj.y = d[y];
-        obj.mult = obj.x*obj.y;
-        pts.push(obj);
-      });
-
-      // Let a equal n times the summation of all x-values multiplied by their corresponding y-values
-      // Let b equal the sum of all x-values times the sum of all y-values
-      // Let c equal n times the sum of all squared x-values
-      // Let d equal the squared sum of all x-values
-      var sum = 0;
-      var xSum = 0;
-      var ySum = 0;
-      var sumSq = 0;
-      pts.forEach(function(pt){
-        sum = sum + pt.mult;
-        xSum = xSum + pt.x;
-        ySum = ySum + pt.y;
-        sumSq = sumSq + (pt.x * pt.x);
-      });
-      var a = sum * n;
-      var b = xSum * ySum;
-      var c = sumSq * n;
-      var d = xSum * xSum;
-
-      // Plug the values that you calculated for a, b, c, and d into the following equation to calculate the slope
-      // slope = m = (a - b) / (c - d)
-      var m = (a - b) / (c - d);
-
-      /////////////
-      //INTERCEPT//
-      /////////////
-
-      // Let e equal the sum of all y-values
-      var e = ySum;
-
-      // Let f equal the slope times the sum of all x-values
-      var f = m * xSum;
-
-      // Plug the values you have calculated for e and f into the following equation for the y-intercept
-      // y-intercept = b = (e - f) / n
-      var b = (e - f) / n;
-      // return an object of two points
-      // each point is an object with an x and y coordinate
-      return {
-        ptA : {
-          x: minX,
-          y: m * minX + b
-        },
-        ptB : {
-          y: minY,
-          x: (minY - b) / m
-        }
-      }
-
-    }
 </script>
 </body>
 <style>

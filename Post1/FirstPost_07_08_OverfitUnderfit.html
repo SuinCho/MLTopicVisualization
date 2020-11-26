@@ -109,6 +109,7 @@ svg.on('click', function(){
 
     //select each circle and append the data
     var selection = svg.selectAll("circle").data(data)
+    console.log(data);
 
     //update selection and draw new circle
     selection.enter()
@@ -130,7 +131,8 @@ svg.on('click', function(){
 
     if(data.length == 2){
       drawline(data);
-    } else if(data.length > 2){
+    } 
+    else if(data.length > 2){
       transitionline(data);
       if(residview){
         resids = drawresiduals(data);

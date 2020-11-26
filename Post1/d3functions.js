@@ -1,3 +1,4 @@
+// draw regression line
 var drawline = function(data){
 
     var xValues = data.map(function(d){return d.x;});
@@ -15,8 +16,9 @@ var drawline = function(data){
       .attr("stroke", "black")
       .attr('id', 'regline');
   }
-  
-  var transitionline = function(data){
+
+// change regression line
+var transitionline = function(data){
     var xValues = data.map(function(d){return d.x;});
     var yValues = data.map(function(d){return d.y;});
     var lsCoef = [LeastSquares(xValues, yValues)];
@@ -32,7 +34,8 @@ var drawline = function(data){
   
   }
   
-  var drawresiduals = function(data){
+// draw residual lines
+var drawresiduals = function(data){
     console.log("herecomes drawresiduals");
   //get least squares coeffs, great dotted red paths
     var xValues = data.map(function(d){return d.x;});
@@ -122,4 +125,14 @@ var drawline = function(data){
       halfcircles(d);
     })
     return resids;
+  }
+
+  // mouse over event
+  var handleMouseOver = function(data) {
+    drawline(data);
+  }
+
+  // mouse out event
+  var handleMouseOut = function(data) {
+    svg.selectAll('path').remove();
   }
