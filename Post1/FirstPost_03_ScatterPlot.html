@@ -5,7 +5,7 @@
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <link rel="stylesheet" type="text/css" href="main.css">
         <script src="leastsquares.js"></script>
-        <!-- <script src="d3functions.js"></script> -->
+        <script src="d3functions.js"></script>
     </head>
 </head>
 
@@ -27,7 +27,19 @@
 var svg = d3.select("#scatterplotviz")
             .append("svg")
             .attr("width", width)
-            .attr("height", height);
+            .attr("height", height)
+            // .on("mouseover",handleMouseOverLine)
+            // .on("mouseout",handleMouseOutLine);
+            .on('mouseover', function (d, i) {
+                d3.select(path).transition()
+                    .duration(50)
+                    .style("opacity", 1);
+            })
+            .on('mouseout', function (d, i) {
+                d3.select(path).transition()
+                    .duration('50')
+                    .style("opacity", 0);
+            });
 
 
 // read the csv data
@@ -40,6 +52,7 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     var numSamples = data.length;
     var term1 = 0;
     var term2 = 0;
+    var radius = 4;
 
      // define scales 
     var xScale = d3.scaleLinear().domain([6, d3.max(data, function(d){
@@ -62,27 +75,6 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     // push GDP data and Ladderscore data into the var x, y
     x.push(data.map(function(d) {return parseFloat(d.GDP);}));
     y.push(data.map(function(d) {return parseFloat(d.Ladderscore);}));
-
-    // for (var i = 0 ; i < numSamples; i++) {
-    //     dataset.push({"GDP": x[0][i], "Ladderscore": y[0][i]});
-    // }
-    // var xValues = data.map(function(d){return parseFloat(d.GDP);});
-    // var yValues = data.map(function(d){return parseFloat(d.Ladderscore);});
-    // var lsCoef = [LeastSquares(xValues, yValues)];
-    
-    // console.log(lsCoef);
-    // console.log(dataset);
-
-    // var lineFunction = d3.line()
-    //   .x(function(d) { return parseFloat(d.GDP); })
-    //   .y(function(d) { return parseFloat(d.Ladderscore); });
-  
-    // svg.append('path')
-    //   .attr("d", lineFunction([{"GDP": 50, "Ladderscore": lsCoef[0].m * 50 + lsCoef[0].b},{"GDP": 450, "Ladderscrore": lsCoef[0].m * 450 + lsCoef[0].b}]))
-    //   .attr("stroke-width", 2)
-    //   .attr("stroke", "black")
-    //   .attr('id', 'regline');
-  
     
     console.log(x);
     console.log(y);
@@ -127,13 +119,10 @@ d3.csv("./archive/2020_revised.csv", function(data) {
             "x": x[0][i]
         })
     }
-    console.log(yhat);
-    console.log(x[0]);
+
     var trimmedData = [];
     trimmedData.push(x[0]);
-    console.log(trimmedData);
-    console.log(trimmedData);
-    console.log(datatoReturn);
+    //console.log(datatoReturn);
 
     datatoReturn.forEach(function(d) {
         d.x = +d.x;
@@ -153,6 +142,18 @@ d3.csv("./archive/2020_revised.csv", function(data) {
              //console.log(yhat);
              return yScale(d.yhat);
         });
+
+    var textdiv =  function(d){
+        svg.append("text").attr({
+               id: "t" + d.x + "-" + d.y + "-",  // Create an id for text so we can select it later for removing on mouseout
+                x: function() { return xScale(d.x) - 30; },
+                y: function() { return yScale(d.y) - 15; }
+            })
+            .text(function() {
+              return [d.x, d.y];  // Value of the text
+            })
+        };
+          
 
     // cut off datapoints that are outside the axis
     svg.append("clipPath")
@@ -191,7 +192,6 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     // append data points
     svg.append("g")
         .attr("id", "circles")
-        .attr("clip-path", "url(#chart-area)")
         .selectAll("circle")
         .data(datatoReturn)
         .enter()
@@ -203,35 +203,43 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("cy", function(d){
           return yScale(d.y);
         })
-        .attr("r", 3.5)
-        .style("fill", "pink")
-        .style("stroke", "pink");
-    
-    d3.select("body").append("div").attr("class","tooltip");
+        .attr("r", radius)
+        .style("fill", "black")
+        .style("stroke", "black")
+        // .on("mouseover",handleMouseOver)
+        // .on("mouseout",handleMouseOut);
+        .on('mouseover', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","pink")
+               .style("stroke", "pink")
+                .attr("r", 7);
+          //Makes the new div appear on hover:
+          textdiv.transition()
+               .duration(50)
+               .style("opacity", 1);
+     })
+     .on('mouseout', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","black")
+               .style("stroke", "black")
+                .attr("r", radius);
+          //Makes the new div disappear:
+          textdiv.transition()
+               .duration('50')
+               .style("opacity", 0);
+     });
+
 
     // append regression line 
     svg.append("path")
+        .attr("id", "regression")
         .datum(datatoReturn)
         .attr("class", "line")
         .attr("d", regressionLine)
         .attr("stroke", "#386cb0")
-        .attr("stroke-width", 1 + "px")
-        .on("mousemove",function(){
-            console.log("hahah")
-            d3.select(".tooltip").style("left",function(d){return (d3.event.pageX+10)+"px"}).style("top",function(d){ return (d3.event.pageY-50)+"px"});
-            d3.select(".tooltip").style("visibility","visible");})
-        .on("mouseout",function(){
-          d3.select(".tooltip").style("visibility","hidden");
-
-        });
-
-        //.attr("d", regressionLine)
-        // .on("mouseover", function(d) { // Add mouseover interaction
-        //     tooltip.transition().duration(200).style("opacity", .9);
-        // })
-        // .on("mouseout", function(d) {
-        //     tooltip.transition().duration(500).style("opacity", .0);
-        // });
+        .attr("stroke-width", 1 + "px");
     
 }) 
 </script>

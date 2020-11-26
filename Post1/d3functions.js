@@ -127,12 +127,44 @@ var drawresiduals = function(data){
     return resids;
   }
 
-  // mouse over event
-  var handleMouseOver = function(data) {
-    drawline(data);
+  // mouse over event on circle
+  function handleMouseOver(d, i) {
+    console.log("haha")
+    d3.select(this).transition().attr({
+      fill: "orange",
+      r: 7
+    });
+
+    // Specify where to put label of text
+    svg.append("text").attr({
+       id: "t" + d.x + "-" + d.y + "-" + i,  // Create an id for text so we can select it later for removing on mouseout
+        x: function() { return xScale(d.x) - 30; },
+        y: function() { return yScale(d.y) - 15; }
+    })
+    .text(function() {
+      return [d.x, d.y];  // Value of the text
+    });
   }
 
-  // mouse out event
-  var handleMouseOut = function(data) {
-    svg.selectAll('path').remove();
+  // mouse out event on circle
+  function handleMouseOut(d, i) {
+    console.log("haha")
+    //svg.selectAll('path').remove();
+     // Use D3 to select element, change color back to normal
+     d3.select(this).transition().attr({
+      fill: "black",
+      r: 3.5
+    });
+    // Select text by id and then remove
+    d3.select("#t" + d.x + "-" + d.y + "-" + i).remove();  // Remove text location
+  }
+
+  // mouse over event on line
+  function handleMouseOverLine(d, i) {
+    regression.transition().duration(200).style("opacity", "1");
+  }
+
+   // mouse out event
+  function handleMouseOutLine(d, i) {
+    regression.transition().duration(200).style("opacity", "0");
   }
