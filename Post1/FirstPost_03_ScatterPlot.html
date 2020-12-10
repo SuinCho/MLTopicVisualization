@@ -55,13 +55,9 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     var radius = 5.5;
 
      // define scales 
-    // var xScale = d3.scaleLinear().domain([6.3, d3.max(data, function(d){
-    //                                 return d.GDP;
-    //                             })])
-    //                             .range([padding,width-padding]);
     var xScale = d3.scaleLinear().domain([6.3, 11.5])
                                 .range([padding,width-padding]);
-    var yScale = d3.scaleLinear().domain([0, d3.max(data, function(d){
+    var yScale = d3.scaleLinear().domain([2, d3.max(data, function(d){
                                         //console.log(d.Ladderscore);
                                         return d.Ladderscore;
                                     })])
@@ -227,7 +223,7 @@ d3.csv("./archive/2020_revised.csv", function(data) {
                .style("fill","pink")
                .style("stroke", "pink")
                 .attr("r", 10);
-          //Makes the new div appear on hover:
+          //Makes the new div appear on hover: show country info 
           textdiv.transition()
                .duration(50)
                .style("opacity", 1);
