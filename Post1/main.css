@@ -148,4 +148,23 @@ h1 {
       font-size: 11px;
   }
 
+  .k {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+  }
+  
+  .k span {
+    position: relative;
+    bottom: 7px;
+    padding: 0 10px;
+  }
+  
+  .hull {
+    fill: tomato;
+    fill-opacity: 0.25;
+    stroke: tomato;
+    pointer-events: none;
+  }
+
 
