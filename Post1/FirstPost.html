@@ -19,16 +19,54 @@
     <div id = "scatterplotviz">
         <h1>Scatterplot - GDP:Happiness Rate</h1>
      </div>
+     <div id = "underfit">
+        <h1>Underfit</h1>
+     </div>
+     <div id = "overfit">
+        <h1>Overfit</h1>
+     </div>
 </div>
 <!-- HERE add slider-->
 <script>
 // define width, height, padding 
-    var width = 800;
-    var height = 600;
+    var width = 500;
+    var height = 300;
     var padding = 30;
 
 // create svg
 var svg = d3.select("#scatterplotviz")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            // .on("mouseover",handleMouseOverLine)
+            // .on("mouseout",handleMouseOutLine);
+            .on('mouseover', function (d, i) {
+                d3.select(path).transition()
+                    .duration(50)
+                    .style("opacity", 1);
+            })
+            .on('mouseout', function (d, i) {
+                d3.select(path).transition()
+                    .duration('50')
+                    .style("opacity", 0);
+            });
+var svgUnderfit = d3.select("#underfit")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            // .on("mouseover",handleMouseOverLine)
+            // .on("mouseout",handleMouseOutLine);
+            .on('mouseover', function (d, i) {
+                d3.select(path).transition()
+                    .duration(50)
+                    .style("opacity", 1);
+            })
+            .on('mouseout', function (d, i) {
+                d3.select(path).transition()
+                    .duration('50')
+                    .style("opacity", 0);
+            });
+var svgOverfit = d3.select("#overfit")
             .append("svg")
             .attr("width", width)
             .attr("height", height)
@@ -56,7 +94,7 @@ d3.csv("./archive/2020_revised.csv", function(data) {
     var numSamples = data.length;
     var term1 = 0;
     var term2 = 0;
-    var radius = 5.5;
+    var radius = 4.5;
 
      // define scales 
     var xScale = d3.scaleLinear().domain([6.3, 11.5])
@@ -84,6 +122,24 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .append("line").classed("v",1)
         .attr("y1",padding).attr("y2",width-225)
         .attr("x1",xScale).attr("x2",xScale)        
+    svgUnderfit.selectAll(".h").data(d3.range(0, 8, 1)).enter()
+        .append("line").classed("h",1)
+        .attr("x1",padding).attr("x2",height+200)
+        .attr("y1",yScale).attr("y2",yScale)
+    
+    svgUnderfit.selectAll(".v").data(d3.range(0,12,0.5)).enter()
+        .append("line").classed("v",1)
+        .attr("y1",padding).attr("y2",width-225)
+        .attr("x1",xScale).attr("x2",xScale)      
+    svgOverfit.selectAll(".h").data(d3.range(0, 8, 1)).enter()
+        .append("line").classed("h",1)
+        .attr("x1",padding).attr("x2",height+200)
+        .attr("y1",yScale).attr("y2",yScale)
+    
+    svgOverfit.selectAll(".v").data(d3.range(0,12,0.5)).enter()
+        .append("line").classed("v",1)
+        .attr("y1",padding).attr("y2",width-225)
+        .attr("x1",xScale).attr("x2",xScale)      
 
     // push GDP data and Ladderscore data into the var x, y
     x.push(data.map(function(d) {return parseFloat(d.GDP);}));
@@ -155,6 +211,23 @@ d3.csv("./archive/2020_revised.csv", function(data) {
              //console.log(yhat);
              return yScale(d.yhat);
         });
+    // create underfitted line 
+    var underfittedLine = d3.line()
+        .x(function(d) {
+            return xScale(d.x);
+        })
+        .y(function(d) {
+             return yScale(5.5);
+        });
+    
+    // create overfitted line 
+    var overfittedLine = d3.line()
+        .x(function(d) {
+            return xScale(d.x);
+        })
+        .y(function(d) {
+             return yScale(d.y);
+        });
 
     var textdiv =  function(d){
         svg.append("text").attr({
@@ -176,7 +249,23 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("y", padding)
         .attr("width", width-padding * 3)
         .attr("height", height-padding *2);
-    
+
+    svgUnderfit.append("clipPath")
+        .attr("id", "chart-area")
+        .append("rect")
+        .attr("x", padding)
+        .attr("y", padding)
+        .attr("width", width-padding * 3)
+        .attr("height", height-padding *2);
+
+    svgOverfit.append("clipPath")
+        .attr("id", "chart-area")
+        .append("rect")
+        .attr("x", padding)
+        .attr("y", padding)
+        .attr("width", width-padding * 3)
+        .attr("height", height-padding *2);
+
     // append Axis
     svg.append("g")
         .attr("class", "x axis")
@@ -201,6 +290,51 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("stroke", "black")
         .text("Happiness Rate")
 
+    svgUnderfit.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (height-padding) + ")")
+        .call(xAxis)
+        .append("text")
+        .attr("y", height - 250)
+        .attr("x", width - 100)
+        .attr("text-anchor", "end")
+        .attr("stroke", "black")
+        .text("GDP");
+
+    svgUnderfit.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "-5.1em")
+        .attr("text-anchor", "end")
+        .attr("stroke", "black")
+        .text("Happiness Rate")
+
+    svgOverfit.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (height-padding) + ")")
+        .call(xAxis)
+        .append("text")
+        .attr("y", height - 250)
+        .attr("x", width - 100)
+        .attr("text-anchor", "end")
+        .attr("stroke", "black")
+        .text("GDP");
+
+    svgOverfit.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "-5.1em")
+        .attr("text-anchor", "end")
+        .attr("stroke", "black")
+        .text("Happiness Rate")
 
     // append data points
     svg.append("g")
@@ -226,7 +360,7 @@ d3.csv("./archive/2020_revised.csv", function(data) {
                .duration('50')
                .style("fill","pink")
                .style("stroke", "pink")
-                .attr("r", 10);
+                .attr("r", 8);
           //Makes the new div appear on hover: show country info 
           textdiv.transition()
                .duration(50)
@@ -244,8 +378,89 @@ d3.csv("./archive/2020_revised.csv", function(data) {
                .style("opacity", 0);
      });
 
+     svgUnderfit.append("g")
+        .attr("id", "circles")
+        .selectAll("circle")
+        .data(datatoReturn)
+        .enter()
+        .append("circle")    
+        .attr("class", "dot")
+        .attr("cx", function(d){
+          return xScale(d.x);
+        })
+        .attr("cy", function(d){
+          return yScale(d.y);
+        })
+        .attr("r", radius)
+        .style("fill", "black")
+        .style("stroke", "black")
+        // .on("mouseover",handleMouseOver)
+        // .on("mouseout",handleMouseOut);
+        .on('mouseover', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","pink")
+               .style("stroke", "pink")
+                .attr("r", 8);
+          //Makes the new div appear on hover: show country info 
+          textdiv.transition()
+               .duration(50)
+               .style("opacity", 1);
+     })
+     .on('mouseout', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","black")
+               .style("stroke", "black")
+                .attr("r", radius);
+          //Makes the new div disappear:
+          textdiv.transition()
+               .duration('50')
+               .style("opacity", 0);
+     });
 
-    // append regression line 
+     svgOverfit.append("g")
+        .attr("id", "circles")
+        .selectAll("circle")
+        .data(datatoReturn)
+        .enter()
+        .append("circle")    
+        .attr("class", "dot")
+        .attr("cx", function(d){
+          return xScale(d.x);
+        })
+        .attr("cy", function(d){
+          return yScale(d.y);
+        })
+        .attr("r", radius)
+        .style("fill", "black")
+        .style("stroke", "black")
+        // .on("mouseover",handleMouseOver)
+        // .on("mouseout",handleMouseOut);
+        .on('mouseover', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","pink")
+               .style("stroke", "pink")
+                .attr("r", 8);
+          //Makes the new div appear on hover: show country info 
+          textdiv.transition()
+               .duration(50)
+               .style("opacity", 1);
+     })
+     .on('mouseout', function (d, i) {
+          d3.select(this).transition()
+               .duration('50')
+               .style("fill","black")
+               .style("stroke", "black")
+                .attr("r", radius);
+          //Makes the new div disappear:
+          textdiv.transition()
+               .duration('50')
+               .style("opacity", 0);
+     });
+
+    // append regression/underfit/overfit line 
     svg.append("path")
         .attr("id", "regression")
         .datum(datatoReturn)
@@ -253,7 +468,20 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("d", regressionLine)
         .attr("stroke", "#386cb0")
         .attr("stroke-width", 1 + "px");
-    
+    svgUnderfit.append("path")
+        .attr("id", "regression")
+        .datum(datatoReturn)
+        .attr("class", "line")
+        .attr("d", underfittedLine)
+        .attr("stroke", "#386cb0")
+        .attr("stroke-width", 1 + "px");
+    svgOverfit.append("path")
+        .attr("id", "regression")
+        .datum(datatoReturn)
+        .attr("class", "line")
+        .attr("d", overfittedLine)
+        .attr("stroke", "#386cb0")
+        .attr("stroke-width", 1 + "px");
 }) 
 
 </script>
