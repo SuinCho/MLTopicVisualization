@@ -2,20 +2,40 @@
 <html lang="en">
 <head>
     <head>
+        <script src="d3.v2.min.js"></script>
+        <script src="d3.v3.js"></script>
         <script src="https://d3js.org/d3.v4.min.js"></script>
+        
         <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    
         <!-- <script src="https://d3js.org/d3.v2.min.js"></script> -->
         <link rel="stylesheet" type="text/css" href="main.css">
         <script type="text/javascript" src="NonlinearData.js"></script>
         <script src="leastsquares.js"></script>
+        <script src="KnearestNeighbors.js"></script>
         <script src="d3functions.js"></script>
     </head>
 </head>
 
 <body>
 <!-- Code here -->
-<div class="center">
+
+<h1>What is Linear Data?</h1>
+<br></br><br></br><br></br><br></br>
+<div class="container">
+    <div id = "randomdataplot"></div>
+     <div id = "textbox">
+        <p>Add Explanation Here</p>
+     </div>
+</div>
+<div class="container">
+    <button id = "newdataBtn" type="button">Try New Dataset!</button>
+    <!-- <button id="residBtn" class="button">Residual View</button>
+    <button id="resetBtn" class="button">Reset</button> -->
+</div>
+<div class="container">
+    <h1>To Predict or to Classify?</h1>
+</div>
+<div class="container">
     <div id = "scatterplotviz">
         <h1>Scatterplot - GDP:Happiness Rate</h1>
      </div>
@@ -26,13 +46,315 @@
         <h1>Overfit</h1>
      </div>
 </div>
+<div class="container">
+     <div id = "textbox">
+        <p>Add Explanation Here</p>
+     </div>
+</div>
+<!-- <div class="container">
+    <div id = "residualplot"></div>
+    <h1>Linear Regression and its prediction performance</h1>
+    <div id = "textbox">
+        <p>Add Explanation Here</p>
+     </div>
+</div>
+<br></br><br></br><br></br>
+<div class="container">
+    <button id="resid_button"  type="button">Residual View</button>
+    <button id="reset_button"  type="button">Reset</button>
+</div>
+<br></br><br></br><br></br><br></br> -->
+<div class="container">
+    <div id = "knn">
+        <h1>Classification and K-Nearest Neighbor</h1>
+     </div>
+</div>
+<div class="container">
+    <div class="k">
+        <span>K = 25</span><input type="range" name="k" value="25" min="1">
+    </div>
+     <div id = "textbox">
+        <p>Add Explanation Here</p>
+     </div>
+</div>
+
 <!-- HERE add slider-->
 <script>
 // define width, height, padding 
     var width = 500;
     var height = 300;
     var padding = 30;
+    var rand_width = 600;
+    var rand_height = 400;
+    var rand_padding = 30;
+    var numDataPoints = 500;
+    var data = [];
+    var residual = [];
+    var resid_width = 500,
+    resid_height = 500, 
+    resid_padding = 50;
+    var resid_data = [];
+    var resid = [];
+    k = 25;
 
+    // function to create random data 
+    function create_data(nsamples) {
+            var x = [];
+            var y = [];
+            var n = nsamples;
+            var x_mean = 0;
+            var y_mean = 0;
+            var term1 = 0;
+            var term2 = 0;
+            var noise_factor = 2 + Math.random()*100;
+            var noise = 0;
+            var slope = (Math.random()*10) *
+                    (Math.round(Math.random()) == 1 ? 1 : -1);
+            for (var i = 0; i < n; i++) {
+                noise = noise_factor * Math.random();
+                noise *= Math.round(Math.random()) == 1 ? 1 : -1;
+                y.push(i / slope + noise);
+                x.push(i + 1);
+                x_mean += x[i]
+                y_mean += y[i]
+            }
+            x_mean /= n;
+            y_mean /= n;
+            var xr = 0;
+            var yr = 0;
+            for (i = 0; i < x.length; i++) {
+                xr = x[i] - x_mean;
+                yr = y[i] - y_mean;
+                term1 += xr * yr;
+                term2 += xr * xr;
+
+            }
+            var b1 = term1 / term2;
+            var b0 = y_mean - (b1 * x_mean);
+            yhat = [];
+            for (i = 0; i < x.length; i++) {
+                yhat.push(b0 + (x[i] * b1));
+            }
+            var data = [];
+            for (i = 0; i < y.length; i++) {
+                data.push({
+                    "yhat": yhat[i],
+                    "y": y[i],
+                    "x": x[i]
+                })
+            }
+            return (data);
+        }
+
+    //create data points
+    var dataset = create_data(numDataPoints);
+    data = dataset;
+
+    // create svg
+    var rand_svg = d3.select("#randomdataplot")
+                .append("svg")
+                .attr("width",rand_width)
+                .attr("height", rand_height);
+
+    // define scales 
+    var rand_xScale = d3.scaleLinear()
+                          .domain([0,d3.max(dataset, function(d){
+                            return d.x;
+                          })])
+                          .range([rand_padding,rand_width-rand_padding*2]);
+
+    var rand_yScale = d3.scaleLinear()
+                          .domain([
+                            d3.min(dataset, function(d){
+                              return(d.y);
+                            }),
+                            d3.max(dataset, function(d){
+                              return d.y;
+                          })]) 
+                          .range([rand_height-rand_padding, rand_padding]);
+
+    var rand_r = d3.scaleLinear().domain([0,500]).range([0,20]);
+
+    //define axis 
+    var rand_xAxis = d3.axisBottom()
+                      .scale(rand_xScale);
+
+    var rand_yAxis = d3.axisLeft()
+                  .scale(rand_yScale)
+                  .ticks(5);
+    
+    // create regression line 
+    var rand_regressionLine = d3.line()
+        .x(function(d) {
+            return rand_xScale(d.x);
+        })
+        .y(function(d) {
+            return rand_yScale(d.yhat);
+        });
+    
+    // cut off datapoints that are outside the axis
+    rand_svg.append("clipPath")
+        .attr("id", "chart-area")
+        .append("rect")
+        .attr("x", rand_padding)
+        .attr("y", rand_padding)
+        .attr("width", rand_width-rand_padding * 3)
+        .attr("height", rand_height-rand_padding *2);
+
+    // append data points
+    rand_svg.append("g")
+        .attr("id", "circles")
+        .attr("clip-path", "url(#chart-area)")
+        .selectAll("circle")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("class", "dot")
+        .attr("cx", function(d){
+          return rand_xScale(d.x);
+        })
+        .attr("cy", function(d){
+          return rand_yScale(d.y);
+        })
+        .attr("r", 3.5);
+    
+    var residview = false;
+
+    // append regression line
+    rand_svg.append("path")
+        .datum(dataset)
+        .attr("clip-path", "url(#chart-area)")
+        .attr("class", "line")
+        .attr("d", rand_regressionLine);
+
+    // append Axes 
+    rand_svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (rand_height-rand_padding) + ")")
+        .call(rand_xAxis);
+
+        rand_svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + rand_padding + ",0)")
+        .call(rand_yAxis);
+
+    d3.select("button")
+      .on("click", function(){
+        // create new data
+        dataset = create_data(numDataPoints);
+
+        //Update scale domains
+        rand_xScale.domain([0, d3.max(dataset, function(d) { return d.x; })]);
+        rand_yScale.domain([
+           d3.min(dataset, function(d) { return d.y; }),
+           d3.max(dataset, function(d) { return d.y; })
+         ]);
+
+        // update data points
+        rand_svg.selectAll("circle")
+            .data(dataset)
+            .transition()
+            .duration(1000)
+            .attr("cx", function(d){
+              return rand_xScale(d.x);
+            })
+            .attr("cy", function(d){
+              return rand_yScale(d.y);
+            });
+
+        // update and transition regression line
+        rand_svg.select("path")
+            .datum(dataset)
+            .transition()
+            .duration(1000)
+            .attr("d", rand_regressionLine)
+            .on("mouseover", function(d) { // Add mouseover interaction
+            tooltip.transition().duration(200).style("opacity", .9);
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition().duration(500).style("opacity", .0);
+            });
+
+        // update axis
+        rand_svg.select(".x.axis")
+              .transition()
+              .duration(1000)
+              .call(xAxis);
+
+        rand_svg.select(".y.axis")
+                .transition()
+                .duration(1000)
+                .call(yAxis);
+      });
+
+    // show residual line when clicked 
+    d3.select('#residBtn').on('click', function() {
+     //console.log(dataset);
+      console.log(residview);
+      if(residview) {
+        rand_svg.selectAll('path.resline').remove();
+        rand_svg.selectAll('path.halfcirc').remove();
+        rand_svg.selectAll("circle").style("opacity", 1)
+        residview = false;
+      }
+      else {
+        rand_svg.selectAll("circle").style("opacity", 0.5)
+        residview = true;
+        drawresiduals(data);
+
+      }
+    })
+
+    // reset when the button clicked 
+    d3.select('#resetBtn').on('click', function() {
+      rand_svg.selectAll('path.resline').remove();
+      rand_svg.selectAll('path.halfcirc').remove();
+      rand_svg.selectAll('circle').remove();
+      //svg.selectAll('path').remove();
+      residview = false;
+      data = []
+      residual = []
+    });
+    
+    //draw new circle on the plot 
+    rand_svg.on('click', function(){
+      if(d3.mouse(this)[0] > (50 + r(200)) && d3.mouse(this)[0] < (450 - r(200)) && d3.mouse(this)[1] > (50 + r(200)) && d3.mouse(this)[1] < (450 - r(200))){
+      //push new data point to data array
+      data.push({"x": d3.mouse(this)[0], "y": d3.mouse(this)[1], "radius": 200, "fill": "Europe", "opacity": 90000});
+
+      //select each circle and append the data
+      var selection = rand_svg.selectAll("circle").data(data)
+
+      //update selection and draw new circle
+      selection.enter()
+        .append("circle")
+        .attr("cx",function(d) {return d.x;})
+        .attr("cy",function(d) {return d.y;})
+        .attr("r",function(d) {return r(d.radius);})
+        .style("fill",function(d) {return "green";})
+        .style("opacity",function(d) {
+          if(residview){
+            return 0;
+          } 
+          else {
+            return o(+d.opacity);
+          }
+      })
+
+      //exit selection
+      selection.exit().remove()
+      if(data.length == 2) {
+        drawline(data);
+      } 
+      else if(data.length > 2) {
+        transitionline(data);
+        if(residview){
+          resids = drawresiduals(data);
+         }
+      }
+     }
+    })
+    
 // create svg
 var svg = d3.select("#scatterplotviz")
             .append("svg")
@@ -483,6 +805,199 @@ d3.csv("./archive/2020_revised.csv", function(data) {
         .attr("stroke", "#386cb0")
         .attr("stroke-width", 1 + "px");
 }) 
+
+ /*KNN*/
+    var kDiv = d3v3.select(".k")
+        .on("change", function() {
+            k = +kDiv.select("input").node().value;
+            d3v3.select(this).select("span").text("K = " + k);
+            findNearest.k(k);
+        });
+        
+    var knn_svg = d3v3.select("#knn").append("svg")
+        .attr("width", rand_width)
+        .attr("height", rand_height);
+        
+    knn_svg.append("rect")
+        .attr("width", rand_width)
+        .attr("height", rand_height)
+        .style("fill-opacity", 0)
+        .on("mousemove", mousemove)
+        .on("wheel", function() {
+            var wheelUp = event.deltaY < 0;
+            wheelUp ? k++ : k--;
+            k = clamp(k, 1, 100); // limit k to be between 1 and 100
+            kDiv.select("input").node().value = k;
+            kDiv.select("span").text("K = " + k);
+            findNearest.k(k);
+            mousemove.call(this);
+    });
+     
+     var knn_data = d3v3.range(500)
+       .map(function(d) {
+         return {
+           x: Math.random() * rand_width,
+           y: Math.random() * rand_height
+         };
+       });
+
+     var findNearest = d3v3.kNearestNeighbors()
+       .extent([[-1, -1], [rand_width + 1, rand_height + 1]])
+       .x(function(d) { return d.x; })
+       .y(function(d) { return d.y; })
+       .k(k)
+       .data(knn_data);
+       
+     var hull = knn_svg.append("path").attr("class", "hull");
+     
+     var circles = knn_svg.append("g").attr("class", "circles")
+         .selectAll("circle").data(knn_data)
+       .enter().append("circle")
+         .attr("cx", function(d) { return d.x; })
+         .attr("cy", function(d) { return d.y; })
+         .attr("r", 2)
+         .style("opacity", 0.5);
+     
+     function mousemove() {
+       preventDefault(event);
+       
+       var nearest = findNearest(d3v3.mouse(this));
+       
+       // Draw convex hull around k-nearest points (if k > 1)
+       hull.datum(d3v3.geom.hull(nearest))
+         .attr("d", function(d) { 
+           return d.length > 1 ? "M" + d.join("L") + "Z" : null; 
+         });
+      
+       // Get corresponding "nearest" data points from original data array 
+       nearest = nearest
+         .map(function(d) { return data[d.i]; });
+       circles
+         .style("fill", function(d) {
+           return nearest.indexOf(d) !== -1 ? "red" : null;
+         });
+     }
+     
+     function clamp(d, min, max) {
+       return d < min ? min : d > max ? max : d;
+     }
+     
+     function preventDefault(e) {
+       e = e || window.event;
+       if (e.preventDefault) e.preventDefault();
+       e.returnValue = false;  
+    }
+
+    /*Residual Plot*/
+    //makes scales
+    var resid_svg=d3.select("#residualplot").append("svg").attr("width",resid_width).attr("height",resid_height);
+    var resid_x=d3.scale.linear().domain([0,10]).range([resid_padding,resid_width-resid_padding]);
+    var resid_y=d3.scale.linear().domain([0,10]).range([resid_height-resid_padding,resid_padding]);
+    var resid_r=d3.scale.linear().domain([0,500]).range([0,20]);
+    var resid_o=d3.scale.linear().domain([10000,100000]).range([.5,1]);
+    // var resid_c=d3.scale.category10().domain(["Africa","America","Asia","Europe","Oceania"]);
+
+    //create axis
+    var resid_xAxis = d3.svg.axis()
+    .scale(resid_x)
+    .orient("bottom");
+
+    var resid_yAxis = d3.svg.axis()
+    .scale(resid_y)
+    .orient("left");
+
+    //draw axis
+    resid_svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + (resid_height - resid_padding) + ")")
+    .call(resid_xAxis);
+
+    resid_svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + resid_padding + ",0)")
+    .call(resid_yAxis);
+
+    //draw dashed lines
+    resid_svg.selectAll(".h").data(d3.range(0,10,2)).enter()
+    .append("line").classed("h",1)
+    .attr("x1",resid_padding).attr("x2",resid_height-resid_padding)
+    .attr("y1",resid_y).attr("y2",resid_y)
+    
+    resid_svg.selectAll(".v").data(d3.range(0,10,2)).enter()
+    .append("line").classed("v",1)
+    .attr("y1",resid_padding).attr("y2",resid_width-resid_padding)
+    .attr("x1",resid_x).attr("x2",resid_x)
+
+
+    var residview = false;
+
+    d3.select('#resid_button').on('click', function() {
+        if ( residview ) {
+            resid_svg.selectAll('path.resline').remove();
+            resid_svg.selectAll('path.halfcirc').remove();
+            resid_svg.selectAll("circle")
+            .style("opacity", 1)
+            residview = false;
+        } else {
+            resid_svg.selectAll("circle")
+            .style("opacity", 0)
+            residview = true;
+            drawresiduals(resid_data);
+        }        
+    });
+
+    d3.select('#reset_button').on('click', function() {
+        resid_svg.selectAll('path.resline').remove();
+        resid_svg.selectAll('path.halfcirc').remove();
+        resid_svg.selectAll('circle').remove();
+        resid_svg.selectAll('path').remove();
+            residview = false;
+            resid_data = []
+            resid = []
+    });  
+
+
+
+    //click event: draw new circle
+    resid_svg.on('click', function(){
+    if(d3.mouse(this)[0] > (50 + resid_r(200)) && d3.mouse(this)[0] < (450 - resid_r(200)) 
+    && d3.mouse(this)[1] > (50 + resid_r(200)) && d3.mouse(this)[1] < (450 - resid_r(200))){
+        //push new data point to data array
+        resid_data.push({"x": d3.mouse(this)[0], "y": d3.mouse(this)[1], "radius": 50, "fill": "Europe", "opacity": 90000});
+
+        //select each circle and append the data
+        var selection = resid_svg.selectAll("circle").data(resid_data)
+        console.log(resid_data);
+
+        //update selection and draw new circle
+        selection.enter()
+        .append("circle")
+        .attr("cx",function(d) {return d.x;})
+        .attr("cy",function(d) {return d.y;})
+        .attr("r",function(d) {return resid_r(d.radius);})
+        .style("fill",function(d) {return "black";})
+        .style("opacity",function(d) {
+        if(residview){
+            return 0;
+        } else {
+            return resid_o(+d.opacity);
+        }
+        })
+
+        //exit selection
+        selection.exit().remove()
+
+        if(data.length == 2){
+        drawline(data);
+        } 
+        else if(data.length > 2){
+        transitionline(data);
+        if(residview){
+            resids = drawresiduals(data);
+        }
+        }
+    }
+    })
 
 </script>
 </body>

@@ -47,15 +47,6 @@
            y: Math.random() * height
          };
        });
-     
-    //    var data = d3.csv("./archive/2020_revised.csv", function(data) {
-    //   data.map(function(d) {
-    //      return {
-    //        x: d3.random.normal(width/2, width/8)(),
-    //        y: Math.random() * height
-    //      };
-    //    })
-    //  })
 
      var findNearest = d3.kNearestNeighbors()
        .extent([[-1, -1], [width + 1, height + 1]])
@@ -105,6 +96,7 @@
        if (e.preventDefault) e.preventDefault();
        e.returnValue = false;  
      }
-    </script>  </body>
+    </script>  
+    </body>
 </html>
 

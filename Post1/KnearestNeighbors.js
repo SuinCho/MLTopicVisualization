@@ -1,10 +1,11 @@
-d3.kNearestNeighbors = function() {
+d3v3.kNearestNeighbors = function() {
   var points = [],
       nodes,
       data,
       extent = null,
       k = 1,
-      quadtree = d3.geom.quadtree(),
+      quadtree = d3v3.geom.quadtree(),
+      //quadtree = d3.quadtree(),
       x = function(d) { return d[0]; },
       y = function(d) { return d[1]; };
       

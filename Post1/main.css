@@ -1,7 +1,9 @@
 body {
     display:flex; flex-direction:column; justify-content:center;
     min-height:100vh;
-  }
+    /* height: 100%;
+    width:100%; */
+}
 h1 {
     text-align: center;
 }
@@ -34,11 +36,15 @@ h1 {
     fill: #293b47
 }
 
-.center {
+.container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
+    margin-bottom: 75px;
+    /* width: 100%;
+    margin: 0 auto;
+    max-width: 700px; */
   }
 
 #newdataBtn {
@@ -148,22 +154,25 @@ h1 {
       font-size: 11px;
   }
 
-  .k {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-  }
+  /* .k {
+    fill: blueviolet;
+  } */
   
   .k span {
     position: relative;
     bottom: 7px;
     padding: 0 10px;
+ 
+  }
+
+  .k input {
+    fill: blueviolet;
   }
   
   .hull {
-    fill: tomato;
+    fill: blueviolet;
     fill-opacity: 0.25;
-    stroke: tomato;
+    stroke: blueviolet;
     pointer-events: none;
   }
 

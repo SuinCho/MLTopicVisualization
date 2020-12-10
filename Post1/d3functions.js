@@ -13,7 +13,7 @@ var drawline = function(data){
       .append('path')
       .attr("d", lineFunction([{"x": 50, "y": lsCoef[0].m * 50 + lsCoef[0].b},{"x": 450, "y": lsCoef[0].m * 450 + lsCoef[0].b}]))
       .attr("stroke-width", 2)
-      .attr("stroke", "black")
+      .attr("stroke", "red")
       .attr('id', 'regline');
   }
 

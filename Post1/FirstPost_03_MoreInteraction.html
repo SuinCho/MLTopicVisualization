@@ -8,14 +8,25 @@
   <script src="d3functions.js"></script>
 </head>
 <body>
-  <button id="resid_button" class="btn btn-danger">Residual View</button>
-  <button id="reset_button" class="btn btn-primary">Reset</button>
-
+  <div class="container">
+    <div id="residplot"></div>
+     <div id = "textbox">
+        <p>Add Explanation Here</p>
+     </div>
+  </div>
+  <div class = "container">
+    <button id="residBtn" class="button">Residual View</button>
+    <button id="resetBtn" class="button">Reset</button>
+  </div>
 </body>
 </html>
 
 <script type="text/javascript">
 //Global Variables
+var residInteraction = function(data){
+
+
+}
 var data = [];
 var resids = [];
 
@@ -26,7 +37,7 @@ var width = 500,
 
 
 //makes scales
-var svg=d3.select("body").append("svg").attr("width",width).attr("height",height);
+var svg=d3.select("#residplot").append("svg").attr("width",width).attr("height",height);
 var x=d3.scale.linear().domain([0,10]).range([margin,width-margin]);
 var y=d3.scale.linear().domain([0,10]).range([height-margin,margin]);
 var r=d3.scale.linear().domain([0,500]).range([0,20]);
@@ -67,8 +78,7 @@ svg.selectAll(".v").data(d3.range(0,10,2)).enter()
 
 var residview = false;
 
-d3.select('#resid_button').on('click', function() {
-
+d3.select('#residBtn').on('click', function() {
     if ( residview ) {
         svg.selectAll('path.resline').remove();
         svg.selectAll('path.halfcirc').remove();
@@ -86,9 +96,7 @@ d3.select('#resid_button').on('click', function() {
     }        
 });
 
-d3.select('#reset_button').on('click', function() {
-
-   
+d3.select('#resetBtn').on('click', function() {
         svg.selectAll('path.resline').remove();
         svg.selectAll('path.halfcirc').remove();
         svg.selectAll('circle').remove();
@@ -105,7 +113,7 @@ d3.select('#reset_button').on('click', function() {
 svg.on('click', function(){
   if(d3.mouse(this)[0] > (50 + r(200)) && d3.mouse(this)[0] < (450 - r(200)) && d3.mouse(this)[1] > (50 + r(200)) && d3.mouse(this)[1] < (450 - r(200))){
     //push new data point to data array
-    data.push({"x": d3.mouse(this)[0], "y": d3.mouse(this)[1], "radius": 200, "fill": "Europe", "opacity": 90000});
+    data.push({"x": d3.mouse(this)[0], "y": d3.mouse(this)[1], "radius": 150, "fill": "Europe", "opacity": 90000});
 
     //select each circle and append the data
     var selection = svg.selectAll("circle").data(data)
@@ -117,7 +125,7 @@ svg.on('click', function(){
     .attr("cx",function(d) {return d.x;})
     .attr("cy",function(d) {return d.y;})
     .attr("r",function(d) {return r(d.radius);})
-    .style("fill",function(d) {return "green";})
+    .style("fill",function(d) {return "black";})
     .style("opacity",function(d) {
       if(residview){
         return 0;
