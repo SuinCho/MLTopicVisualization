@@ -24,9 +24,10 @@
 <div class="container">
     <div id = "randomdataplot"></div>
      <div id = "textbox">
-        <p>The term linear model implies that the model is specified as a linear combination of features. Based on training data, 
-            the learning process computes one weight for each feature to form a model that can predict or estimate the target value. 
-            For example, if your target is the amount of insurance a customer will purchase and your variables are age and income, a simple linear model would be the following:
+        <p>The <b>linear model</b> implies that the model is represented with linear features. Based on training data, 
+            the learning process computes one weight for each feature to form a model that can <b>predict or estimate </b>the target value. 
+        </p>
+        <p>In this plot, when you click on <b>Try new dataset</b> button, the new data points that have <b>linear tendency</b> will be randomly generated. 
         </p>
      </div>
 </div>
@@ -37,6 +38,13 @@
 </div>
 <div class="container">
     <h1>To Predict or to Classify?</h1>
+</div>
+<div class="container">
+    <div id = "textbox">
+        <p>There are mainly two forms of data analysis that <b>predict the trends</b> or <b>classify</b>. These two forms are as follows − <b>prediction and classification.</b></p>
+        <p>Regression is a kind of supervised learning where we have a target variable or something we want to predict. The difference between regression and classification is that in regression, our target variable is numeric and continuous. 
+            For example, we can build a <b>classification model</b> to <b>categorize the kind of Iris flower</b> or use a <b>prediction model </b>to predict the stock price in the near future.</p>
+    </div>
 </div>
 <div class="container">
     <div id = "scatterplotviz">
@@ -51,9 +59,15 @@
 </div>
 <div class="container">
      <div id = "textbox">
-        <p>Regression is a kind of supervised learning where we have a target variable or something we want to predict. The difference between regression and classification is that in regression, our target variable is numeric and continuous.
-            LR is used for finding a linear relationship between the target and one or more predictors. The variable we are predicting is called the (criterion variable, outcome variable, endogenous variable, or regressand) while the variable(s) we are basing our predictions on is called the (predictor variable, exogenous variable, or regressor). There are two types of linear regression: Simple LR or Multiple LR. When there is only one predictor variable, the prediction method is called simple LR. The plot of a simple LR always forms a straight line.</p>
-     </div>
+        <p><b>Linear Regression </b>is a prediction approach to model the relationship between a scalar value and one or more explanatory variables (also known as dependent and independent variables). 
+           When there is one explanatory parameter then we call this as simple linear regression; multiple linear regression on the other hand, is when we have for more than one parameters. We now just focus on simple linear regression case. </p>
+        <p>Information on Regression Line</p>
+        <p>In terms of performance analysis, we compute mean squared error (MSE) of regression line and the datapoints.</p>
+        <p>Your model is <b>underfitting</b> the training data when the <b>model performs poorly on the training data</b>--the model is unable to capture the relationship between the input examples and the target values.  In terms of MSE, the MSE value will be very high. 
+        Whereas, </p>Your model is <b>overfitting</b> your training data when you see that the <b>model performs well on the training data</b> but does not perform well on the test data. 
+        This is occured as the model is memorizing the data it has seen and is unable to generalize to unseen examples. In terms of MSE, it is low but this case is not optimal.</p>
+        <p>In the first plot, you will see the <b>best-fitted </b> case, and the sencond plot and the third plot represent underfitted case and the overfitted case, respectively.</p>
+        </div>
 </div>
 <!-- <div class="container">
     <div id = "residualplot"></div>
@@ -77,9 +91,13 @@
     <div class="k">
         <span>K = 25</span><input type="range" name="k" value="25" min="1">
     </div>
-     <div id = "textbox">
-        <p>Add Explanation Here</p>
-     </div>
+</div>
+<div class="container">
+    <div id = "textbox">
+       <p>The k-nearest neighbors (KNN) algorithm is one of the well known <b>supervised machine learning algorithm </b>that can be used to solve classification problems. 
+        <b>K</b>, as a <b>hyperparameter </b> decides the number of nearest datapoints that are gathered together. In the plot above, you can manipulate the value of K and see the changes!
+           </p>
+       </div>
 </div>
 
 <!-- HERE add slider-->
