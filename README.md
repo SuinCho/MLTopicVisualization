@@ -6,6 +6,8 @@ Please run on the root directory of the project:
 npm install http-server -g
 npx http-server
 ```
+
+## Description
 Once you finished the installation, plese connect to http://127.0.0.1:8080
 In the index of files, please open **FirstPost.html**
 
